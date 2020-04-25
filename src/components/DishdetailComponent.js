@@ -1,12 +1,12 @@
-import React,{Component} from 'react';
-import { Card, CardImg, CardBody, CardTitle, CardText } from 'reactstrap';
+import React  from 'react';
 
-class DishDetail extends Component{
-    constructor(props){
-        super(props);
-    }
+import { Card, CardImg, CardText, CardBody,
+    CardTitle, Breadcrumb, BreadcrumbItem } from 'reactstrap';
+import { Link } from 'react-router-dom';
 
-    renderDish(dish) {
+  
+    
+function RenderDish({dish}) {
         if(dish != null) {
             return(
                 <div>
@@ -25,10 +25,10 @@ class DishDetail extends Component{
         }
     }
 
-    renderComments(commentsArray) {
+     function RenderComments({commentsArray}) {
         let options = { year: "numeric", month: "short", day: "numeric"};
         if(commentsArray != null) {
-            this.item = commentsArray.map((value) => {
+            commentsArray = commentsArray.map((value) => {
                 return(
                     <div className="container">
                         <ul className="list-unstyled">
@@ -46,25 +46,44 @@ class DishDetail extends Component{
         }
         return(
             <div>
-                {this.item}
+                {commentsArray}
             </div>
         );
     }
 
-    render(){
-        const DISH = this.props.selectedDish;
+    const  DishDetail = (props) =>  {
+    
+           
+    
+        
+        const DISH = props.selectedDish;
         if(DISH != null) {
             
-            const commentsArray = DISH.comments;
+            const commentsArray = props.comments;
             return(
+            <div className="container">
+                <div className="row">
+                    <Breadcrumb>
+
+                        <BreadcrumbItem><Link to="/menu">Menu</Link></BreadcrumbItem>
+                        <BreadcrumbItem active>{props.selectedDish.name}</BreadcrumbItem>
+                    </Breadcrumb>
+                    <div className="col-12">
+                        <h3>{props.selectedDish.name}</h3>
+                        <hr />
+                    </div>                
+                </div>
+            
+
                 <div className="row">
                     <div className="col-12 col-md-5 m-1">
-                        {this.renderDish(DISH)}
+                    <RenderDish dish= {DISH} />
                     </div>
                     <div className="col-12 col-md-5 m-1">
                         <h4>Comments</h4>
-                        {this.renderComments(commentsArray)}
+                        <RenderComments commentsArray={commentsArray}/>
                     </div>
+                </div>
                 </div>
             );
         }
@@ -74,6 +93,6 @@ class DishDetail extends Component{
             );
         }
     }
-}
+
 
     export default DishDetail;
