@@ -4,7 +4,7 @@ import { Navbar, NavbarBrand } from 'reactstrap';
 import Menu from './MenuComponent';
 import Contact from './ContactComponent';
 import  About from  './AboutComponent';
-
+import CommentForm from './DishdetailComponent'; 
 import DishDetail from './DishdetailComponent'; 
 import Header from  './HeaderComponent';
 import Footer from  './FooterComponent';
