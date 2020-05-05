@@ -1,11 +1,14 @@
 import React from 'react';
 import { Breadcrumb, BreadcrumbItem, Card, CardBody, CardHeader, Media } from 'reactstrap';
 import { Link } from 'react-router-dom';
+import { Loading } from './LoadingComponent';
+import {  Fade, Stagger } from 'react-animation-components';
+import { baseUrl } from '../shared/baseUrl';
 
 const RenderLeader=({leader})=>(
 <div key={leader.id} className="col-12 ">
     <Media tag="li"className="mt-4" >
-        <Media object src={leader.image} alt={leader.name} />
+        <Media object src={baseUrl + leader.image} alt={leader.name} />
     
      <Media body className="ml-4">
             <Media heading>{leader.name} </Media> 
@@ -22,14 +25,45 @@ const RenderLeader=({leader})=>(
 
 function About(props) {
 
-    const leaders = props.leaders.map((leader) => {
-        
-       
     
-        return (
-            <RenderLeader  leader={leader}/>
-        );
-    });
+    const leaders =(() => {
+        if (props.leaders.isLoading){
+            return(
+                <div className="container">
+                    <div className="row">
+                        <Loading/>
+                    </div>
+                </div>
+            );
+        }
+            else if(props.leaders.errMess){
+                return(
+                    <div className="container">
+                        <div className="row">
+                <h4>{props.leaders.errMess}</h4>
+                        </div>
+                    </div>
+                );
+            }
+            else {
+                return(
+                    <ul className="list-unstyled">
+                        <Stagger in>
+                            {
+                                props.leaders.leaders.map((leader)=>{
+                                    return(
+                                        <Fade in>
+                                            <RenderLeader leader={leader}/>
+                                        </Fade>
+                                    );
+                                })
+                            }
+                        </Stagger>
+                    </ul>
+                );
+            }
+        
+    })();
 
     return(
         <div className="container">

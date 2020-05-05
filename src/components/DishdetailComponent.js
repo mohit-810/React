@@ -5,6 +5,9 @@ import { Card, CardImg, CardText, CardBody,
 import { Link } from 'react-router-dom';
 import { Component } from 'react';
 import { Control, LocalForm, Errors } from 'react-redux-form';
+import { Loading } from './LoadingComponent';
+import { baseUrl } from '../shared/baseUrl';
+import { FadeTransform, Fade, Stagger } from 'react-animation-components';
 
 const required = (val) => val && val.length;
 const maxLength = (len) => (val) => !(val) || (val.length <= len);
@@ -38,8 +41,8 @@ class CommentForm extends Component{
         });
     }
     handleSubmit(values) {
-        console.log('Current State is: ' + JSON.stringify(values));
-        alert('Current State is: ' + JSON.stringify(values));
+        this.toggleModal();
+        this.props.postComment(this.props.dishId, values.rating, values.author, values.comments);
         // event.preventDefault();
     }
     
@@ -76,13 +79,13 @@ class CommentForm extends Component{
                     <Row className="form-group">
                     <Label htmlFor="yourname" md={12}>Your Name</Label>
                     <Col md={12}>
-                    <Control.text model=".yourname" id="yourname" name="yourname"placeholder="Your Name"
+                    <Control.text model=".author" id="author" name="author"placeholder="Your Name"
                      className="form-control"  validators={{
                         required, minLength: minLength(3), maxLength: maxLength(15)
                     }}/>
                     <Errors
                                         className="text-danger"
-                                        model=".yourname"
+                                        model=".author"
                                         show="touched"
                                         messages={{
                                             required: 'Required',
@@ -119,13 +122,21 @@ function RenderDish({dish}) {
         if(dish != null) {
             return(
                 <div>
-                    <Card>
-                        <CardImg width="100%" src={dish.image}></CardImg>
-                        <CardBody>
-                        <CardTitle>{dish.name}</CardTitle>
-                        <CardText>{dish.description}</CardText>
-                        </CardBody>
-                    </Card>
+
+            <FadeTransform
+                in
+                transformProps={{
+                    exitTransform: 'scale(0.5) translateY(-50%)'
+                }}>
+
+                        <Card>
+                        <CardImg top src={baseUrl + dish.image} alt={dish.name} />
+                            <CardBody>
+                            <CardTitle>{dish.name}</CardTitle>
+                            <CardText>{dish.description}</CardText>
+                            </CardBody>
+                        </Card>
+                    </FadeTransform>
                 </div>
             );
         }
@@ -134,20 +145,30 @@ function RenderDish({dish}) {
         }
     }
 
-     function RenderComments({commentsArray}) {
+     function RenderComments({commentsArray,postComment,dishId}) {
         let options = { year: "numeric", month: "short", day: "numeric"};
         if(commentsArray != null) {
+            
             commentsArray = commentsArray.map((value) => {
+               
                 return(
                     <div className="container">
                         <ul className="list-unstyled">
+                        <Stagger in>
+                            <Fade in>
                             <li className="mt-3">{value.comment}</li>
                             <li className="mt-3">{"-- "}{value.author}{", "}{new Date(value.date).toLocaleDateString("en-US",options)}</li>
+                            </Fade>
+                            </Stagger>
                         </ul>
                     </div>
                 );
+               
             });
+            
+            
         }
+        
         else{
             return(
                 <div></div>
@@ -156,17 +177,38 @@ function RenderDish({dish}) {
         return(
             <div>
                 {commentsArray}
+                <CommentForm dishId={dishId} postComment={postComment} />
             </div>
         );
     }
+    
 
-    const  DishDetail = (props) =>  {
+    const  DishDetail = (props,addComment,dishId) =>  {
     
            
     
         
         const DISH = props.selectedDish;
-        if(DISH != null) {
+        if(props.isLoading){
+            return(
+                <div className="container">
+                    <div className="row">
+                        <Loading />
+                    </div>
+                </div>
+
+            );
+        }
+        else if (props.errMess) {
+            return(
+                <div className="container">
+                    <div className="row">            
+                        <h4>{props.errMess}</h4>
+                    </div>
+                </div>
+            );
+        }
+       else  if(DISH != null) {
             
             const commentsArray = props.comments;
             return(
@@ -190,8 +232,10 @@ function RenderDish({dish}) {
                     </div>
                     <div className="col-12 col-md-5 m-1">
                         <h4>Comments</h4>
-                        <RenderComments commentsArray={commentsArray}/>
-                       <CommentForm/>
+                        <RenderComments commentsArray={commentsArray}
+                        postComment={props.postComment}
+                        dishId={DISH.id}/>
+                       
                     </div>
                 </div>
                 </div>
